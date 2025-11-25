@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile — Cognifin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/shared.css">
+<style>
+.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+.profile-avatar-section{display:flex;align-items:center;gap:16px;margin-bottom:28px;}
+.profile-av-big{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,var(--accent),#00a070);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:#000;}
+.plan-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;}
+.plan-starter{background:var(--bg4);color:var(--text2);border:1px solid var(--border2);}
+.plan-autopilot{background:var(--green-dim);color:var(--accent);border:1px solid rgba(0,229,160,0.2);}
+.key-area{background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:20px;}
+.key-row{display:flex;gap:8px;margin-top:12px;}
+.key-input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:11px 14px;font-family:'DM Mono',monospace;font-size:12px;color:var(--text);outline:none;transition:border-color 0.2s;}
+.key-input:focus{border-color:var(--accent);}
+.key-input::placeholder{color:var(--text3);}
+.section-divider{height:1px;background:var(--border);margin:28px 0;}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);}
+.info-row:last-child{border-bottom:none;}
+.info-key{font-size:12px;color:var(--text3);}
+.info-val{font-size:13px;font-weight:500;}
+.gemini-steps{background:var(--bg3);border-radius:12px;padding:16px;margin-bottom:16px;}
+.gemini-step{display:flex;align-items:flex-start;gap:10px;padding:8px 0;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border);}
+.gemini-step:last-child{border-bottom:none;}
+.gemini-step-num{width:20px;height:20px;border-radius:6px;background:var(--bg4);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--text3);flex-shrink:0;font-family:'DM Mono',monospace;}
+.free-pill{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:#34a853;background:rgba(52,168,83,0.1);border:1px solid rgba(52,168,83,0.2);border-radius:20px;padding:3px 10px;margin-top:8px;}
+.danger-zone{background:rgba(224,85,85,0.04);border:1px solid rgba(224,85,85,0.1);border-radius:12px;padding:20px;}
+.danger-zone h3{font-size:14px;font-weight:600;color:var(--red);margin-bottom:8px;}
+.danger-zone p{font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6;}
+@media(max-width:900px){.profile-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="logo-mark">C</div><div class="logo-text">Cognifin</div></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Overview</div>
+      <a href="/dashboard" class="nav-item" data-page="/dashboard"><span class="nav-icon">⬡</span> Dashboard</a>
+      <a href="/portfolio" class="nav-item" data-page="/portfolio"><span class="nav-icon">◈</span> Portfolio</a>
+      <a href="/goals" class="nav-item" data-page="/goals"><span class="nav-icon">◎</span> Goals</a>
+      <div class="nav-section">Tools</div>
+      <a href="/chat" class="nav-item" data-page="/chat"><span class="nav-icon">✦</span> AI Chat</a>
+      <div class="nav-section">Account</div>
+      <a href="/profile" class="nav-item active" data-page="/profile"><span class="nav-icon">◯</span> Profile & API Key</a>
+      <button class="nav-item" id="logoutBtn" style="color:var(--red);"><span class="nav-icon">→</span> Sign Out</button>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="/profile" class="user-pill" style="text-decoration:none;">
+        <div class="user-av" id="sidebarUserAv">U</div>
+        <div><div class="user-name" id="sidebarUserName">Loading…</div><div class="user-plan" id="sidebarUserPlan">Starter</div></div>
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header fade-up">
+      <h1>Profile</h1>
+      <p>Manage your account and Gemini API key</p>
+    </div>
+    <div class="page-body">
+      <div class="profile-grid">
+
+        <!-- Left: Profile info -->
+        <div>
+          <div class="card fade-up-2">
+            <div class="profile-avatar-section">
+              <div class="profile-av-big" id="profileAv">U</div>
+              <div>
+                <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;letter-spacing:-0.5px;" id="profileName">Loading…</div>
+                <div style="font-size:12px;color:var(--text3);margin-top:4px;" id="profileUsername"></div>
+                <div style="margin-top:8px;" id="profilePlan"></div>
+              </div>
+            </div>
+            <div class="section-divider"></div>
+            <div id="profileInfoRows"></div>
+          </div>
+
+          <!-- Danger zone -->
+          <div class="card" style="margin-top:20px;" id="dangerCard">
+            <div class="danger-zone">
+              <h3>⚠ Sign Out</h3>
+              <p>Sign out from your Cognifin account. Your data is safe and will be here when you return.</p>
+              <button class="btn btn-danger btn-sm" id="logoutBtnMain">Sign Out</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Gemini API key -->
+        <div>
+          <div class="card fade-up-3">
+            <div class="card-title">⬡ Gemini API Key</div>
+            <p style="font-size:13px;color:var(--text3);margin-bottom:16px;line-height:1.6;">Connect your free Google Gemini API key to unlock real AI-powered financial verdicts. No subscription needed.</p>
+
+            <div class="gemini-steps">
+              <div class="gemini-step"><div class="gemini-step-num">1</div><span>Visit <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--accent);text-decoration:none;">aistudio.google.com/apikey</a></span></div>
+              <div class="gemini-step"><div class="gemini-step-num">2</div><span>Sign in with your Google account</span></div>
+              <div class="gemini-step"><div class="gemini-step-num">3</div><span>Click "Create API Key" → copy the key</span></div>
+              <div class="gemini-step"><div class="gemini-step-num">4</div><span>Paste below and click Save</span></div>
+            </div>
+
+            <div class="free-pill">🟢 Gemini 1.5 Flash · Free tier · No credit card</div>
+
+            <div class="key-area" style="margin-top:16px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+                <div style="font-size:12px;font-weight:600;">Your API Key</div>
+                <div id="keyStatusLabel" style="font-size:11px;color:var(--text3);">Not configured</div>
+              </div>
+              <div class="key-row">
+                <input type="password" class="key-input" id="geminiKeyInput" placeholder="AIza..." />
+                <button class="btn btn-primary btn-sm" onclick="saveApiKey()">Save Key</button>
+              </div>
+              <div style="font-size:11px;color:var(--text3);margin-top:8px;">Keys are stored server-side per session. Never shared.</div>
+            </div>
+
+            <div class="section-divider"></div>
+            <div style="font-size:12px;color:var(--text3);line-height:1.7;">
+              <strong style="color:var(--text2);">Why Gemini?</strong> Cognifin uses Gemini 1.5 Flash — Google's fastest free AI model. Unlike ChatGPT, the free tier has no message limits or daily caps for normal usage. Your key stays on your device and server session.
+            </div>
+          </div>
+
+          <!-- Plan info -->
+          <div class="card" style="margin-top:20px; fade-up-4">
+            <div class="card-title">◈ Your Plan</div>
+            <div id="planDetails"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div id="toast-container"></div>
+<script src="/assets/js/shared.js"></script>
+<script>
+async function saveApiKey() {
+  const key = document.getElementById('geminiKeyInput').value.trim();
+  if (!key.startsWith('AIza')) { toast('Invalid Gemini key. It should start with "AIza…"', 'error'); return; }
+  const data = await api.put('/portfolio/gemini-key', { key });
+  if (data.success) {
+    toast('Gemini API key saved! AI chat is now activated.', 'success');
+    document.getElementById('keyStatusLabel').textContent = '✓ Active';
+    document.getElementById('keyStatusLabel').style.color = 'var(--accent)';
+  } else {
+    toast(data.error || 'Failed to save key', 'error');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!Auth.requireAuth()) return;
+  initCursor(); initSidebar();
+
+  try {
+    const [profile, keyStatus] = await Promise.all([
+      api.get('/user/profile'),
+      api.get('/portfolio/gemini-key-status')
+    ]);
+
+    document.getElementById('profileAv').textContent = profile.name[0].toUpperCase();
+    document.getElementById('profileName').textContent = profile.name;
+    document.getElementById('profileUsername').textContent = '@' + profile.username;
+    document.getElementById('profilePlan').innerHTML = `<span class="plan-badge ${profile.plan==='autopilot'?'plan-autopilot':'plan-starter'}">${profile.plan==='autopilot'?'★ Autopilot':'◯ Starter'}</span>`;
+
+    document.getElementById('profileInfoRows').innerHTML = [
+      ['Email', profile.email],
+      ['Phone', profile.phone],
+      ['City', profile.city],
+      ['Member since', fmtDate(profile.joinedAt)],
+      ['Account ID', profile.id]
+    ].map(([k,v])=>`<div class="info-row"><span class="info-key">${k}</span><span class="info-val">${v||'—'}</span></div>`).join('');
+
+    if (keyStatus?.hasKey) {
+      document.getElementById('keyStatusLabel').textContent = '✓ ' + keyStatus.maskedKey;
+      document.getElementById('keyStatusLabel').style.color = 'var(--accent)';
+    }
+
+    const plans = {
+      starter: { name:'Starter', price:'₹0/mo', features:['Gemini AI chat','Portfolio tracking','5 verdicts/day','Demo mode'] },
+      autopilot: { name:'Autopilot ★', price:'₹499/mo', features:['Unlimited AI verdicts','Full portfolio sync','Tax optimization','Goal tracking','Priority support'] }
+    };
+    const p = plans[profile.plan] || plans.starter;
+    document.getElementById('planDetails').innerHTML = `
+      <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-bottom:4px;">${p.name}</div>
+      <div style="font-size:14px;color:var(--text2);margin-bottom:16px;">${p.price}</div>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;">
+        ${p.features.map(f=>`<li style="font-size:13px;color:var(--text2);display:flex;align-items:center;gap:8px;"><span style="color:var(--accent);font-weight:700;">✓</span>${f}</li>`).join('')}
+      </ul>
+      ${profile.plan==='starter'?'<a href="/chat" class="btn btn-secondary btn-sm" style="margin-top:16px;">Upgrade to Autopilot →</a>':''}`;
+
+  } catch(e) {
+    toast('Failed to load profile.', 'error');
+  }
+
+  const logoutHandler = async () => { await api.post('/auth/logout',{}); Auth.clear(); window.location.href='/login'; };
+  document.getElementById('logoutBtn')?.addEventListener('click', logoutHandler);
+  document.getElementById('logoutBtnMain')?.addEventListener('click', logoutHandler);
+});
+</script>
+</body>
+</html>

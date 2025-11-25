@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Cognifin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/shared.css">
+<style>
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;}
+.insight-item{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid var(--border);align-items:flex-start;}
+.insight-item:last-child{border-bottom:none;}
+.insight-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.insight-icon.warning{background:var(--gold-dim);}
+.insight-icon.success{background:var(--green-dim);}
+.insight-icon.info{background:rgba(77,159,255,0.08);}
+.insight-title{font-size:13px;font-weight:600;margin-bottom:4px;}
+.insight-body{font-size:12px;color:var(--text3);line-height:1.6;}
+.insight-action{font-size:11px;color:var(--accent);margin-top:6px;cursor:pointer;text-decoration:none;display:inline-block;}
+.fund-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+.fund-row:last-child{border-bottom:none;}
+.fund-name{flex:1;font-size:13px;font-weight:500;}
+.fund-type{font-size:11px;color:var(--text3);margin-top:2px;}
+.fund-val{font-size:13px;font-weight:600;text-align:right;}
+.fund-irr{font-size:11px;text-align:right;margin-top:2px;}
+.welcome-banner{background:linear-gradient(135deg,rgba(0,229,160,0.06),rgba(0,229,160,0.02));border:1px solid rgba(0,229,160,0.15);border-radius:16px;padding:24px 28px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:20px;}
+.wb-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;letter-spacing:-0.5px;margin-bottom:4px;}
+.wb-sub{font-size:13px;color:var(--text2);}
+.chart-bars{display:flex;align-items:flex-end;gap:5px;height:70px;margin-top:12px;}
+.chart-bar{flex:1;border-radius:3px 3px 0 0;background:var(--bg4);position:relative;overflow:hidden;min-height:4px;}
+.chart-bar-fill{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,var(--accent),rgba(0,229,160,0.3));border-radius:inherit;transition:height 0.8s ease;}
+.loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:500;}
+.spinner{width:32px;height:32px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div></div>
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">C</div>
+      <div class="logo-text">Cognifin</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Overview</div>
+      <a href="/dashboard" class="nav-item active" data-page="/dashboard"><span class="nav-icon">⬡</span> Dashboard</a>
+      <a href="/portfolio" class="nav-item" data-page="/portfolio"><span class="nav-icon">◈</span> Portfolio</a>
+      <a href="/goals" class="nav-item" data-page="/goals"><span class="nav-icon">◎</span> Goals</a>
+      <div class="nav-section">Tools</div>
+      <a href="/chat" class="nav-item" data-page="/chat"><span class="nav-icon">✦</span> AI Chat</a>
+      <div class="nav-section">Account</div>
+      <a href="/profile" class="nav-item" data-page="/profile"><span class="nav-icon">◯</span> Profile & API Key</a>
+      <button class="nav-item" id="logoutBtn" style="color:var(--red);"><span class="nav-icon">→</span> Sign Out</button>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="/profile" class="user-pill" style="text-decoration:none;">
+        <div class="user-av" id="sidebarUserAv">U</div>
+        <div><div class="user-name" id="sidebarUserName">Loading…</div><div class="user-plan" id="sidebarUserPlan">Starter</div></div>
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+    <div class="page-header fade-up">
+      <h1>Dashboard</h1>
+      <p id="pageSubtitle">Your financial overview</p>
+    </div>
+    <div class="page-body">
+
+      <!-- Welcome banner -->
+      <div class="welcome-banner fade-up-2" id="welcomeBanner">
+        <div>
+          <div class="wb-title" id="welcomeName">Good morning!</div>
+          <div class="wb-sub" id="welcomeMsg">Loading your financial summary…</div>
+        </div>
+        <a href="/chat" class="btn btn-primary btn-sm">✦ Ask Cognifin →</a>
+      </div>
+
+      <!-- Stat cards -->
+      <div class="stat-grid fade-up-3" id="statGrid">
+        <div class="stat-card">
+          <div class="stat-label">Total Assets</div>
+          <div class="stat-value" id="totalAssets">—</div>
+          <div class="stat-sub" id="totalAssetsSub">Loading…</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Portfolio XIRR</div>
+          <div class="stat-value stat-up" id="xirrVal">—</div>
+          <div class="stat-sub" id="xirrSub">Loading…</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Alpha vs Benchmark</div>
+          <div class="stat-value stat-up" id="alphaVal">—</div>
+          <div class="stat-sub">vs Nifty 500 TRI</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Annual TER Cost</div>
+          <div class="stat-value" id="terVal">—</div>
+          <div class="stat-sub" id="flaggedSub">Loading…</div>
+        </div>
+      </div>
+
+      <!-- Grid: Insights + Top Funds -->
+      <div class="grid-2 fade-up-4">
+        <div class="card">
+          <div class="card-title">⚡ Smart Insights</div>
+          <div id="insightsList"><div style="color:var(--text3);font-size:13px;padding:12px 0;">Loading insights…</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="display:flex;justify-content:space-between;">
+            <span>◈ Top Holdings</span>
+            <a href="/portfolio" style="font-size:11px;color:var(--accent);text-decoration:none;">View all →</a>
+          </div>
+          <div id="topFundsList"><div style="color:var(--text3);font-size:13px;padding:12px 0;">Loading…</div></div>
+        </div>
+      </div>
+
+      <!-- Portfolio bar chart -->
+      <div class="card" style="margin-top:20px;">
+        <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+          <span>◈ Portfolio Allocation</span>
+          <span id="mfStockSplit" style="font-size:11px;color:var(--text3);"></span>
+        </div>
+        <div class="chart-bars" id="chartBars"></div>
+        <div style="display:flex;gap:20px;margin-top:12px;" id="chartLegend"></div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div id="toast-container"></div>
+
+<script src="/assets/js/shared.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!Auth.requireAuth()) return;
+  initCursor(); initSidebar();
+
+  const user = Auth.getUser();
+  const hour = new Date().getHours();
+  const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('welcomeName').textContent = `${greet}, ${user.name.split(' ')[0]}! 👋`;
+
+  try {
+    const [summary, insights, portfolio] = await Promise.all([
+      api.get('/portfolio/summary'),
+      api.get('/user/insights'),
+      api.get('/portfolio')
+    ]);
+
+    document.getElementById('loadingOverlay').style.display = 'none';
+
+    // Stats
+    document.getElementById('totalAssets').textContent = fmt(summary.totalAssets);
+    document.getElementById('totalAssetsSub').textContent = `MF ${fmt(summary.mfTotal)} + Stocks ${fmt(summary.stockTotal)}`;
+    document.getElementById('xirrVal').textContent = summary.xirr + '%';
+    document.getElementById('xirrSub').textContent = `Benchmark: ${summary.benchmarkXIRR}%`;
+    document.getElementById('alphaVal').textContent = '+' + summary.alphaVsBenchmark + '%';
+    document.getElementById('terVal').textContent = fmt(summary.terAnnual) + '/yr';
+    document.getElementById('flaggedSub').innerHTML = `<span style="color:var(--red)">${summary.flaggedFunds} funds flagged</span>`;
+    document.getElementById('pageSubtitle').textContent = `Last updated ${fmtDate(summary.lastUpdated)}`;
+    document.getElementById('welcomeMsg').textContent = `Portfolio XIRR ${summary.xirr}% · Alpha +${summary.alphaVsBenchmark}% vs benchmark · ${summary.flaggedFunds} funds need attention`;
+
+    // Insights
+    const ins = document.getElementById('insightsList');
+    if (insights.length === 0) {
+      ins.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:12px 0;">No active alerts. Portfolio looks healthy!</div>';
+    } else {
+      ins.innerHTML = insights.map(i => `
+        <div class="insight-item">
+          <div class="insight-icon ${i.type}">${i.icon}</div>
+          <div>
+            <div class="insight-title">${i.title}</div>
+            <div class="insight-body">${i.body}</div>
+            ${i.action ? `<a href="/portfolio" class="insight-action">${i.action} →</a>` : ''}
+          </div>
+        </div>`).join('');
+    }
+
+    // Top funds (top 5 by value)
+    const sorted = [...portfolio.mutualFunds].sort((a,b) => b.value - a.value).slice(0,5);
+    document.getElementById('topFundsList').innerHTML = sorted.map(f => `
+      <div class="fund-row">
+        <div>
+          <div class="fund-name">${f.name.length > 30 ? f.name.substring(0,30)+'…' : f.name}</div>
+          <div class="fund-type">${f.type}</div>
+        </div>
+        <div>
+          <div class="fund-val">${fmt(f.value)}</div>
+          <div class="fund-irr ${f.irr > 0 ? 'stat-up' : 'stat-down'}">${fmtPct(f.irr)}</div>
+        </div>
+      </div>`).join('');
+
+    // Bar chart
+    const allFunds = portfolio.mutualFunds;
+    const maxVal = Math.max(...allFunds.map(f => f.value));
+    document.getElementById('chartBars').innerHTML = allFunds.map(f => {
+      const pct = (f.value / maxVal * 100).toFixed(1);
+      const color = f.status === 'flagged' ? 'linear-gradient(to top,var(--red),rgba(224,85,85,0.3))' :
+                    f.status === 'hold' ? 'linear-gradient(to top,var(--accent),rgba(0,229,160,0.3))' :
+                    'linear-gradient(to top,var(--gold),rgba(212,168,67,0.3))';
+      return `<div class="chart-bar" title="${f.name}: ${fmt(f.value)}"><div class="chart-bar-fill" style="height:${pct}%;background:${color};"></div></div>`;
+    }).join('');
+
+    const mfPct = ((summary.mfTotal / summary.totalAssets)*100).toFixed(0);
+    const stPct = ((summary.stockTotal / summary.totalAssets)*100).toFixed(0);
+    document.getElementById('mfStockSplit').textContent = `MF ${mfPct}% · Stocks ${stPct}%`;
+    document.getElementById('chartLegend').innerHTML = `
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);"><div style="width:10px;height:10px;border-radius:2px;background:var(--accent);"></div>Hold</div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);"><div style="width:10px;height:10px;border-radius:2px;background:var(--red);"></div>Flagged</div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);"><div style="width:10px;height:10px;border-radius:2px;background:var(--gold);"></div>Review</div>`;
+
+  } catch(e) {
+    document.getElementById('loadingOverlay').style.display = 'none';
+    toast('Failed to load portfolio data. Is the backend running?', 'error', 5000);
+  }
+
+  document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+    await api.post('/auth/logout', {});
+    Auth.clear();
+    window.location.href = '/login';
+  });
+});
+</script>
+</body>
+</html>

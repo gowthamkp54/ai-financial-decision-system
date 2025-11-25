@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — Cognifin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080808;--bg2:#0f0f0f;--bg3:#161616;--bg4:#1c1c1c;--border:#252525;--border2:#2e2e2e;--text:#f2f0eb;--text2:#a09a90;--text3:#5a5650;--accent:#00e5a0;--red:#e05555;--gold:#d4a843;}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;cursor:none;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:100;opacity:0.4;}
+.grid-bg{position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,160,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,160,0.03) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse 70% 70% at 50% 50%,black,transparent);}
+.glow{position:fixed;width:500px;height:500px;background:radial-gradient(circle,rgba(0,229,160,0.05) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
+.cursor{width:10px;height:10px;background:var(--accent);border-radius:50%;position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform 0.1s,width 0.2s,height 0.2s;mix-blend-mode:difference;}
+.cursor-ring{width:36px;height:36px;border:1px solid rgba(0,229,160,0.4);border-radius:50%;position:fixed;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all 0.15s ease-out;}
+.login-wrap{position:relative;z-index:10;width:100%;max-width:420px;padding:20px;}
+.back-link{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text3);text-decoration:none;margin-bottom:32px;transition:color 0.2s;}
+.back-link:hover{color:var(--text2);}
+.login-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:40px;}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:32px;}
+.logo-mark{width:40px;height:40px;background:linear-gradient(135deg,var(--accent),#00a070);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:#000;}
+.logo-text{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;letter-spacing:-0.5px;}
+h1{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;letter-spacing:-1px;margin-bottom:8px;}
+.sub{font-size:13px;color:var(--text3);margin-bottom:32px;line-height:1.6;}
+.form-group{margin-bottom:18px;}
+label{display:block;font-size:12px;color:var(--text2);font-weight:500;margin-bottom:8px;letter-spacing:0.3px;}
+input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border-color 0.2s;}
+input:focus{border-color:var(--accent);}
+input::placeholder{color:var(--text3);}
+.btn-submit{width:100%;background:var(--accent);color:#000;border:none;border-radius:10px;padding:13px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-submit:hover{opacity:0.85;transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,229,160,0.2);}
+.btn-submit:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+.divider{text-align:center;margin:24px 0;position:relative;}
+.divider::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:var(--border);}
+.divider span{background:var(--bg2);padding:0 14px;font-size:12px;color:var(--text3);position:relative;}
+.demo-accounts{display:flex;flex-direction:column;gap:8px;}
+.demo-btn{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:11px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:all 0.2s;color:var(--text2);font-size:13px;font-family:'DM Sans',sans-serif;}
+.demo-btn:hover{border-color:rgba(0,229,160,0.3);color:var(--text);}
+.demo-btn .creds{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);}
+.error-msg{background:rgba(224,85,85,0.08);border:1px solid rgba(224,85,85,0.2);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:16px;display:none;}
+.footer-link{text-align:center;margin-top:24px;font-size:13px;color:var(--text3);}
+.footer-link a{color:var(--accent);text-decoration:none;}
+.spinner{width:16px;height:16px;border:2px solid rgba(0,0,0,0.3);border-top-color:#000;border-radius:50%;animation:spin 0.7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.login-card{animation:fadeUp 0.5s ease both;}
+</style>
+</head>
+<body>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="grid-bg"></div>
+<div class="glow"></div>
+
+<div class="login-wrap">
+  <a href="/" class="back-link">← Back to home</a>
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-mark">C</div>
+      <div class="logo-text">Cognifin</div>
+    </div>
+    <h1>Welcome back</h1>
+    <p class="sub">Sign in to your financial autopilot.<br>No signup needed — use a demo account below.</p>
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" id="username" placeholder="user123" autocomplete="username" />
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" />
+    </div>
+    <button class="btn-submit" id="loginBtn" onclick="doLogin()">
+      <span id="loginBtnText">Sign In</span>
+    </button>
+
+    <div class="divider"><span>or use a demo account</span></div>
+    <div class="demo-accounts">
+      <button class="demo-btn" onclick="fillDemo('user123','Cognifin@2026')">
+        <span>Rohit M. · Bangalore <span style="font-size:11px;color:var(--text3);">₹49,980 portfolio</span></span>
+        <span class="creds">user123 / Cognifin@2026</span>
+      </button>
+      <button class="demo-btn" onclick="fillDemo('priya_k','Cognifin@2026')">
+        <span>Priya K. · Mumbai <span style="font-size:11px;color:var(--text3);">₹1,82,500 portfolio</span></span>
+        <span class="creds">priya_k / Cognifin@2026</span>
+      </button>
+      <button class="demo-btn" onclick="fillDemo('arjun_s','Cognifin@2026')">
+        <span>Arjun S. · Hyderabad <span style="font-size:11px;color:var(--text3);">₹28,750 portfolio</span></span>
+        <span class="creds">arjun_s / Cognifin@2026</span>
+      </button>
+    </div>
+    <div class="footer-link">Don't have an account? <a href="/register">Create one</a></div>
+  </div>
+</div>
+
+<script>
+const cursor=document.getElementById('cursor');const ring=document.getElementById('cursorRing');
+document.addEventListener('mousemove',e=>{cursor.style.left=e.clientX+'px';cursor.style.top=e.clientY+'px';setTimeout(()=>{ring.style.left=e.clientX+'px';ring.style.top=e.clientY+'px';},80);});
+document.querySelectorAll('input,button,a').forEach(el=>{el.addEventListener('mouseenter',()=>{cursor.style.width='20px';cursor.style.height='20px';});el.addEventListener('mouseleave',()=>{cursor.style.width='10px';cursor.style.height='10px';});});
+
+// Auto-redirect if logged in
+const sid=localStorage.getItem('cognifin_session');
+if(sid){fetch('/api/auth/me',{headers:{'x-session-id':sid}}).then(r=>r.json()).then(d=>{if(d.user)window.location.href='/dashboard';}).catch(()=>{});}
+
+function fillDemo(u,p){document.getElementById('username').value=u;document.getElementById('password').value=p;}
+
+document.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+async function doLogin(){
+  const btn=document.getElementById('loginBtn');
+  const txt=document.getElementById('loginBtnText');
+  const err=document.getElementById('errorMsg');
+  const u=document.getElementById('username').value.trim();
+  const p=document.getElementById('password').value;
+  if(!u||!p){showError('Please enter username and password.');return;}
+  btn.disabled=true;
+  txt.innerHTML='<div class="spinner"></div>';
+  err.style.display='none';
+  try{
+    const r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
+    const d=await r.json();
+    if(d.error){showError(d.error);}
+    else{
+      localStorage.setItem('cognifin_session',d.sessionId);
+      localStorage.setItem('cognifin_user',JSON.stringify(d.user));
+      window.location.href='/dashboard';
+    }
+  }catch(e){showError('Cannot connect to server. Make sure the backend is running on port 3001.');}
+  finally{btn.disabled=false;txt.textContent='Sign In';}
+}
+function showError(msg){const e=document.getElementById('errorMsg');e.textContent=msg;e.style.display='block';}
+</script>
+</body>
+</html>

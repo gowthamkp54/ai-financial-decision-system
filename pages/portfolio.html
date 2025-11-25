@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio — Cognifin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/shared.css">
+<style>
+.tabs{display:flex;gap:4px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:4px;width:fit-content;margin-bottom:24px;}
+.tab{padding:8px 20px;border-radius:9px;font-size:13px;font-weight:500;cursor:pointer;color:var(--text3);border:none;background:none;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+.tab.active{background:var(--bg);color:var(--text);border:1px solid var(--border2);}
+.tab:hover:not(.active){color:var(--text2);}
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;}
+.status-hold{background:var(--accent);}
+.status-flagged{background:var(--red);}
+.status-review{background:var(--gold);}
+.status-underweight{background:var(--blue, #4d9fff);}
+.fund-name-cell{max-width:220px;}
+.fund-name-cell .fn{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fund-name-cell .ft{font-size:11px;color:var(--text3);margin-top:2px;}
+.flagged-banner{background:rgba(224,85,85,0.06);border:1px solid rgba(224,85,85,0.15);border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:12px;}
+.ter-note{font-size:11px;color:var(--text3);margin-top:4px;}
+.stock-row td{font-size:13px;}
+.pnl-pos{color:var(--accent);}
+.pnl-neg{color:var(--red);}
+</style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="logo-mark">C</div><div class="logo-text">Cognifin</div></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Overview</div>
+      <a href="/dashboard" class="nav-item" data-page="/dashboard"><span class="nav-icon">⬡</span> Dashboard</a>
+      <a href="/portfolio" class="nav-item active" data-page="/portfolio"><span class="nav-icon">◈</span> Portfolio</a>
+      <a href="/goals" class="nav-item" data-page="/goals"><span class="nav-icon">◎</span> Goals</a>
+      <div class="nav-section">Tools</div>
+      <a href="/chat" class="nav-item" data-page="/chat"><span class="nav-icon">✦</span> AI Chat</a>
+      <div class="nav-section">Account</div>
+      <a href="/profile" class="nav-item" data-page="/profile"><span class="nav-icon">◯</span> Profile & API Key</a>
+      <button class="nav-item" id="logoutBtn" style="color:var(--red);"><span class="nav-icon">→</span> Sign Out</button>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="/profile" class="user-pill" style="text-decoration:none;">
+        <div class="user-av" id="sidebarUserAv">U</div>
+        <div><div class="user-name" id="sidebarUserName">Loading…</div><div class="user-plan" id="sidebarUserPlan">Starter</div></div>
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header fade-up">
+      <h1>Portfolio</h1>
+      <p>Your mutual funds, stocks and allocation analysis</p>
+    </div>
+    <div class="page-body">
+
+      <!-- Summary stats -->
+      <div class="stat-grid fade-up-2" id="statGrid"></div>
+
+      <!-- Flagged alert -->
+      <div id="flaggedBanner" style="display:none;" class="flagged-banner fade-up-3">
+        <span style="font-size:18px;">⚠</span>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--red);" id="flaggedTitle"></div>
+          <div style="font-size:12px;color:var(--text3);margin-top:3px;" id="flaggedBody"></div>
+        </div>
+        <a href="/chat" class="btn btn-danger btn-sm" style="margin-left:auto;">Ask Cognifin →</a>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs fade-up-3">
+        <button class="tab active" onclick="switchTab('mf',this)">Mutual Funds</button>
+        <button class="tab" onclick="switchTab('stocks',this)">Stocks</button>
+      </div>
+
+      <!-- MF Table -->
+      <div id="tabMf" class="card fade-up-4">
+        <div class="table-wrap">
+          <table id="mfTable">
+            <thead>
+              <tr>
+                <th>Fund</th><th>Type</th><th>Value</th><th>IRR</th><th>TER %</th><th>TER ₹/yr</th><th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="mfBody"><tr><td colspan="7" style="color:var(--text3);text-align:center;padding:24px;">Loading…</td></tr></tbody>
+          </table>
+        </div>
+        <div class="ter-note" id="terFooter"></div>
+      </div>
+
+      <!-- Stocks Table -->
+      <div id="tabStocks" class="card fade-up-4" style="display:none;">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Stock</th><th>Sector</th><th>Qty</th><th>Avg Buy</th><th>CMP</th><th>Value</th><th>P&L</th><th>P&L %</th></tr>
+            </thead>
+            <tbody id="stockBody"><tr><td colspan="8" style="color:var(--text3);text-align:center;padding:24px;">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div id="toast-container"></div>
+<script src="/assets/js/shared.js"></script>
+<script>
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tabMf').style.display = tab==='mf' ? 'block' : 'none';
+  document.getElementById('tabStocks').style.display = tab==='stocks' ? 'block' : 'none';
+}
+
+const statusMap = {
+  hold: ['status-hold','Hold'],
+  flagged: ['status-flagged','Flagged'],
+  review: ['status-review','Review'],
+  underweight: ['status-underweight','Underweight']
+};
+
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!Auth.requireAuth()) return;
+  initCursor(); initSidebar();
+
+  try {
+    const [summary, portfolio] = await Promise.all([api.get('/portfolio/summary'), api.get('/portfolio')]);
+
+    // Stats
+    const flagCount = summary.flaggedFunds;
+    document.getElementById('statGrid').innerHTML = `
+      <div class="stat-card"><div class="stat-label">Mutual Funds</div><div class="stat-value">${fmt(summary.mfTotal)}</div><div class="stat-sub">${portfolio.mutualFunds.length} funds</div></div>
+      <div class="stat-card"><div class="stat-label">Stocks</div><div class="stat-value">${fmt(summary.stockTotal)}</div><div class="stat-sub">${portfolio.stocks.length} holdings</div></div>
+      <div class="stat-card"><div class="stat-label">Portfolio XIRR</div><div class="stat-value stat-up">${summary.xirr}%</div><div class="stat-sub">Benchmark: ${summary.benchmarkXIRR}%</div></div>
+      <div class="stat-card"><div class="stat-label">Annual TER Drag</div><div class="stat-value">${fmt(summary.terAnnual)}</div><div class="stat-sub" style="color:${flagCount>0?'var(--red)':'var(--text3)'};">${flagCount} funds flagged</div></div>`;
+
+    // Flagged banner
+    if (flagCount > 0) {
+      const flaggedFunds = portfolio.mutualFunds.filter(f=>f.status==='flagged');
+      const flagVal = flaggedFunds.reduce((a,f)=>a+f.value,0);
+      document.getElementById('flaggedBanner').style.display = 'flex';
+      document.getElementById('flaggedTitle').textContent = `${flagCount} funds underperforming benchmark`;
+      document.getElementById('flaggedBody').textContent = `${fmt(flagVal)} in flagged funds · Est. drag: ${fmt(flaggedFunds.reduce((a,f)=>a+f.value*f.ter/100,0))}/yr · Switch to direct index funds`;
+    }
+
+    // MF Table
+    let totalTer = 0;
+    document.getElementById('mfBody').innerHTML = portfolio.mutualFunds.map(f => {
+      const terAmt = Math.round(f.value * f.ter / 100);
+      totalTer += terAmt;
+      const [cls, label] = statusMap[f.status] || ['status-hold','Hold'];
+      const irrColor = f.irr > 8 ? 'stat-up' : f.irr > 0 ? '' : 'stat-down';
+      return `<tr>
+        <td class="fund-name-cell"><div class="fn" title="${f.name}">${f.name}</div></td>
+        <td><span class="badge badge-gray">${f.type}</span></td>
+        <td><strong>${fmt(f.value)}</strong></td>
+        <td class="${irrColor}">${fmtPct(f.irr)}</td>
+        <td style="font-family:'DM Mono',monospace;">${f.ter}%</td>
+        <td style="font-family:'DM Mono',monospace;">${fmt(terAmt)}</td>
+        <td><span class="badge ${f.status==='flagged'?'badge-red':f.status==='hold'?'badge-green':'badge-gold'}"><span class="status-dot ${cls}"></span>${label}</span></td>
+      </tr>`;
+    }).join('');
+    document.getElementById('terFooter').textContent = `Total TER cost: ${fmt(totalTer)}/year. Regular plans cost 0.5–1.5% more than direct equivalents.`;
+
+    // Stocks Table
+    document.getElementById('stockBody').innerHTML = portfolio.stocks.length === 0
+      ? '<tr><td colspan="8" style="color:var(--text3);text-align:center;padding:24px;">No stock holdings found.</td></tr>'
+      : portfolio.stocks.map(s => {
+          const val = s.qty * s.cmp;
+          const cost = s.qty * s.avgBuy;
+          const pnl = val - cost;
+          const pnlPct = ((pnl/cost)*100).toFixed(2);
+          const cls = pnl >= 0 ? 'pnl-pos' : 'pnl-neg';
+          return `<tr class="stock-row">
+            <td><strong>${s.name}</strong></td>
+            <td>${s.sector}</td>
+            <td>${s.qty}</td>
+            <td>₹${s.avgBuy.toLocaleString('en-IN')}</td>
+            <td>₹${s.cmp.toLocaleString('en-IN')}</td>
+            <td><strong>₹${val.toLocaleString('en-IN')}</strong></td>
+            <td class="${cls}">${pnl >= 0 ? '+' : ''}₹${Math.abs(pnl).toLocaleString('en-IN')}</td>
+            <td class="${cls}">${pnl >= 0 ? '+' : ''}${pnlPct}%</td>
+          </tr>`;
+        }).join('');
+
+  } catch(e) {
+    toast('Failed to load portfolio. Is the backend running?', 'error', 5000);
+  }
+  document.getElementById('logoutBtn')?.addEventListener('click', async () => { await api.post('/auth/logout',{}); Auth.clear(); window.location.href='/login'; });
+});
+</script>
+</body>
+</html>
